@@ -46,12 +46,7 @@ function checkSOS(row, column, squares) {
         }
     }
     return null;
-
-    // if (squares[row][column] === 'O') {
-    //     const lines = [
-
-    //     ]
-    // }
+    
 }
 
 class Board extends Component {
