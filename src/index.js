@@ -47,7 +47,19 @@ class Board extends Component {
                 squares: squares,
             });
         }
-        this.checkSOS(i, j)
+        this.checkSOS(i, j);
+
+        // const grid = this.state.squares;
+
+        // grid.map((row, i) => {
+        //             row.map((column, j) => {
+        //                 if (grid[i][j]==null) {
+
+        //                 }
+        //             })
+        //             return null;
+        //         }
+        // )
     }
 
     renderToggleLetter() {
@@ -79,25 +91,20 @@ class Board extends Component {
             [row - 1, column + 1, row, column, row + 1, column - 1],
         ];
 
+        let currentScore = this.state.isPlayerOne ? this.state.playerOneScore : this.state.playerTwoScore;
+        const player = this.state.isPlayerOne ? 'one' : 'two';
+
         for (let i = 0; i < lines.length; i++) {
             const [ar, ac, br, bc, cr, cc] = lines[i];
 
             if ((ar >= 0 && ar <= 17) && (br >= 0 && br <= 17) && (cr >= 0 && cr <= 17)) {
 
                 const pattern = this.state.squares[ar][ac] + this.state.squares[br][bc] + this.state.squares[cr][cc];
-
                 if (pattern === 'SOS') {
-                    this.scores();
+                    currentScore += 1;
                 }
             }
         }
-    }
-
-    scores() {
-        let currentScore = this.state.isPlayerOne ? this.state.playerOneScore : this.state.playerTwoScore;
-        const player = this.state.isPlayerOne ? 'one' : 'two';
-        currentScore += 1;
-
         if (this.state.isPlayerOne) {
             this.setState({
                 playerOneScore: currentScore
@@ -110,7 +117,6 @@ class Board extends Component {
         }
 
         console.log(player + ": " + currentScore);
-
         this.setState({
             isPlayerOne: !this.state.isPlayerOne
         })
