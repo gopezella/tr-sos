@@ -18,36 +18,42 @@ function ToggleLetter(props) {
     );
 }
 
-function checkSOS(row, column, squares) {
-    const lines = [
-        [row, column, row, column+1, row, column+2],
-        [row, column, row+1, column, row+2, column],
-        [row, column, row+1, column+1, row+2, column+2],
-        [row, column, row-1, column+1, row-2, column+2],
+// function checkSOS(row, column, squares) {
+//     const lines = [
+//         [row, column, row, column+1, row, column+2],
+//         [row, column, row+1, column, row+2, column],
+//         [row, column, row+1, column+1, row+2, column+2],
+//         [row, column, row-1, column+1, row-2, column+2],
 
-        [row, column-1, row, column, row, column+1],
-        [row-1, column, row, column, row+1, column],
-        [row-1, column-1, row, column, row+1, column+1],
-        [row-1, column+1, row, column, row+1, column-1],
+//         [row, column-1, row, column, row, column+1],
+//         [row-1, column, row, column, row+1, column],
+//         [row-1, column-1, row, column, row+1, column+1],
+//         [row-1, column+1, row, column, row+1, column-1],
 
-        [row, column-2, row, column-1, row, column],
-        [row-2, column, row-1, column, row, column],
-        [row-2, column-2, row-1, column-1, row, column],
-        [row+2, column-2, row+1, column-1, row, column],
-    ];
+//         [row, column-2, row, column-1, row, column],
+//         [row-2, column, row-1, column, row, column],
+//         [row-2, column-2, row-1, column-1, row, column],
+//         [row+2, column-2, row+1, column-1, row, column],
+//     ];
 
-    for (let i = 0; i < lines.length; i++) {
-        const [ar, ac, br, bc, cr, cc] = lines[i];
-        
-        console.log('ar:' + ar + ' ac:' + ac + ' br:' + br + ' bc:' + bc + ' cr:' + cr + ' cc:' + cc);
-        
-        if (squares[ar][ac] === 'S' && squares[br][bc] === 'O' && squares[cr][cc] === 'S') {
-            console.log('Scores');
-        }
-    }
-    return null;
-    
-}
+//     for (let i = 0; i < lines.length; i++) {
+//         const [ar, ac, br, bc, cr, cc] = lines[i];
+
+//         console.log('ar:' + ar + ' ac:' + ac + ' br:' + br + ' bc:' + bc + ' cr:' + cr + ' cc:' + cc);
+
+//         // if (squares[ar][ac] === 'S' && squares[br][bc] === 'O' && squares[cr][cc] === 'S') {
+//         //     console.log('Scores');
+//         // }
+
+//         const pattern = squares[ar][ac] + squares[br][bc] + squares[cr][cc];
+
+//         if (pattern === 'SOS') {
+//             console.log('You Scored');
+//         }
+//     }
+//     return null;
+
+// }
 
 class Board extends Component {
     constructor(props) {
@@ -58,6 +64,38 @@ class Board extends Component {
         };
     }
 
+    checkSOS(row, column) {
+        const lines = [
+            [row, column, row, column + 1, row, column + 2],
+            [row, column, row + 1, column, row + 2, column],
+            [row, column, row + 1, column + 1, row + 2, column + 2],
+            [row, column, row + 1, column - 1, row + 2, column - 2],
+            [row, column, row, column - 1, row, column - 2],
+            [row, column, row - 1, column, row - 2, column],
+            [row, column, row - 1, column - 1, row - 2, column - 2],
+            [row, column, row - 1, column + 1, row - 2, column + 2],
+
+            [row, column - 1, row, column, row, column + 1],
+            [row - 1, column, row, column, row + 1, column],
+            [row - 1, column - 1, row, column, row + 1, column + 1],
+            [row - 1, column + 1, row, column, row + 1, column - 1],
+        ];
+
+        for (let i = 0; i < lines.length; i++) {
+            const [ar, ac, br, bc, cr, cc] = lines[i];
+
+            if ((ar >= 0 && ar <= 17) && (br >= 0 && br <= 17) && (cr >= 0 && cr <= 17)) {
+                // console.log('ar:' + ar + ' ac:' + ac + ' br:' + br + ' bc:' + bc + ' cr:' + cr + ' cc:' + cc);
+
+                const pattern = this.state.squares[ar][ac] + this.state.squares[br][bc] + this.state.squares[cr][cc];
+
+                if (pattern === 'SOS') {
+                    console.log('You Scored');
+                }
+            }
+        }
+    }
+
     handleSquareClick(i, j) {
         const squares = this.state.squares.slice();
         if (squares[i][j] == null) {
@@ -66,7 +104,7 @@ class Board extends Component {
                 squares: squares,
             });
         }
-        checkSOS(i, j, squares)
+        this.checkSOS(i, j)
     }
 
     renderSquare(i, j) {
