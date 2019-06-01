@@ -23,7 +23,7 @@ class Board extends Component {
         super(props);
         this.state = {
             squares: Array(5).fill(null).map(x => Array(5).fill(null)),
-            xIsNext: true,
+            isLetterS: true,
             isPlayerOne: true,
             playerOneScore: 0,
             playerTwoScore: 0,
@@ -39,7 +39,7 @@ class Board extends Component {
 
     handleButtonClick() {
         this.setState({
-            xIsNext: !this.state.xIsNext,
+            isLetterS: !this.state.isLetterS,
         });
     }
 
@@ -55,12 +55,13 @@ class Board extends Component {
     handleSquareClick(i, j) {
         const squares = this.state.squares.slice();
         if (squares[i][j] == null) {
-            squares[i][j] = this.state.xIsNext ? 'S' : 'O';
+            squares[i][j] = this.state.isLetterS ? 'S' : 'O';
             this.setState({
                 squares: squares,
             });
 
             this.checkSOS(i, j);
+            this.checkIfFull();
         }
 
         // const grid = this.state.squares;
@@ -130,8 +131,44 @@ class Board extends Component {
         }
     }
 
+    checkIfFull() {
+        const grid = this.state.squares;
+        let x = [];
+
+        for (let i = 0; i < grid.length; i++) {
+            let index = grid[i].indexOf(null);
+            x.push(index);
+        }
+
+        const y = x.find(z => {
+            return z > -1
+        })
+
+        if (typeof y === 'undefined') {
+            this.setState({
+                isBoardFull: true
+            })
+        }
+    }
+
+    declareWinner() {
+        const full = this.state.isBoardFull;
+        const scoreOne = this.state.playerOneScore;
+        const scoreTwo = this.state.playerTwoScore;
+        if (full) {
+            console.log('Player One Score: ' + scoreOne);
+            console.log('Player Two Score: ' + scoreTwo);
+            if (scoreOne > scoreTwo) {
+                console.log('Player One wins')
+            }
+            if (scoreOne < scoreTwo) {
+                console.log('Player Two wins')
+            }
+        }
+    }
+
     render() {
-        const status = 'Player ' + (this.state.isPlayerOne ? '1\'s' : '2\'s') + ' turn: ' + (this.state.xIsNext ? 'S' : 'O');
+        const status = 'Player ' + (this.state.isPlayerOne ? '1\'s' : '2\'s') + ' turn: ' + (this.state.isLetterS ? 'S' : 'O');
         const playerOneScore = 'Player 1: ' + (this.state.playerOneScore);
         const playerTwoScore = 'Player 2: ' + (this.state.playerTwoScore);
 
@@ -146,6 +183,8 @@ class Board extends Component {
                 </div>
             )
         })
+
+        this.declareWinner();
 
         return (
             <div>
