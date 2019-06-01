@@ -22,12 +22,25 @@ class Board extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            squares: Array(18).fill(null).map(x => Array(18).fill(null)),
+            squares: Array(5).fill(null).map(x => Array(5).fill(null)),
             xIsNext: true,
             isPlayerOne: true,
             playerOneScore: 0,
-            playerTwoScore: 0
+            playerTwoScore: 0,
+            isBoardFull: false
         };
+    }
+
+    renderToggleLetter() {
+        return (
+            <ToggleLetter onClick={() => this.handleButtonClick()} />
+        );
+    }
+
+    handleButtonClick() {
+        this.setState({
+            xIsNext: !this.state.xIsNext,
+        });
     }
 
     renderSquare(i, j) {
@@ -46,32 +59,25 @@ class Board extends Component {
             this.setState({
                 squares: squares,
             });
+
+            this.checkSOS(i, j);
         }
-        this.checkSOS(i, j);
 
         // const grid = this.state.squares;
+        // let full = this.state.isBoardFull;
+        // const scoreOne = this.state.playerOneScore;
+        // const scoreTwo = this.state.playerTwoScore;
 
-        // grid.map((row, i) => {
-        //             row.map((column, j) => {
-        //                 if (grid[i][j]==null) {
-
-        //                 }
-        //             })
-        //             return null;
-        //         }
-        // )
-    }
-
-    renderToggleLetter() {
-        return (
-            <ToggleLetter onClick={() => this.handleButtonClick()} />
-        );
-    }
-
-    handleButtonClick() {
-        this.setState({
-            xIsNext: !this.state.xIsNext,
-        });
+        // if (full) {
+        //     console.log('Player One Score: ' + scoreOne);
+        //     console.log('Player Two Score: ' + scoreTwo);
+        //     if (scoreOne > scoreTwo) {
+        //         console.log('Player One wins')
+        //     }
+        //     if (scoreOne < scoreTwo) {
+        //         console.log('Player Two wins')
+        //     }
+        // }
     }
 
     checkSOS(row, column) {
@@ -92,38 +98,42 @@ class Board extends Component {
         ];
 
         let currentScore = this.state.isPlayerOne ? this.state.playerOneScore : this.state.playerTwoScore;
-        const player = this.state.isPlayerOne ? 'one' : 'two';
+        let scoreIncremented = false;
 
         for (let i = 0; i < lines.length; i++) {
             const [ar, ac, br, bc, cr, cc] = lines[i];
 
-            if ((ar >= 0 && ar <= 17) && (br >= 0 && br <= 17) && (cr >= 0 && cr <= 17)) {
+            if ((ar >= 0 && ar <= 4) && (br >= 0 && br <= 4) && (cr >= 0 && cr <= 4)) {
 
                 const pattern = this.state.squares[ar][ac] + this.state.squares[br][bc] + this.state.squares[cr][cc];
                 if (pattern === 'SOS') {
                     currentScore += 1;
+                    scoreIncremented = true;
                 }
             }
         }
+
         if (this.state.isPlayerOne) {
             this.setState({
                 playerOneScore: currentScore
             })
-        }
-        else {
+        } else {
             this.setState({
                 playerTwoScore: currentScore
             })
         }
 
-        console.log(player + ": " + currentScore);
-        this.setState({
-            isPlayerOne: !this.state.isPlayerOne
-        })
+        if (!scoreIncremented) {
+            this.setState({
+                isPlayerOne: !this.state.isPlayerOne
+            })
+        }
     }
 
     render() {
-        const status = 'Next player: ' + (this.state.xIsNext ? 'S' : 'O');
+        const status = 'Player ' + (this.state.isPlayerOne ? '1\'s' : '2\'s') + ' turn: ' + (this.state.xIsNext ? 'S' : 'O');
+        const playerOneScore = 'Player 1: ' + (this.state.playerOneScore);
+        const playerTwoScore = 'Player 2: ' + (this.state.playerTwoScore);
 
         const grid = this.state.squares;
 
@@ -140,6 +150,8 @@ class Board extends Component {
         return (
             <div>
                 <div className="status">{status} {this.renderToggleLetter()}</div>
+                <div className="score">{playerOneScore}</div>
+                <div className="score">{playerTwoScore}</div>
                 {board}
             </div>
         );
@@ -147,14 +159,6 @@ class Board extends Component {
 }
 
 class Game extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            // playerOneScore: 0,
-            // playerTwoScore: 0
-        };
-    }
-
     render() {
         return (
             <div className="game">
