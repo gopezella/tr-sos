@@ -63,22 +63,6 @@ class Board extends Component {
             this.checkSOS(i, j);
             this.checkIfFull();
         }
-
-        // const grid = this.state.squares;
-        // let full = this.state.isBoardFull;
-        // const scoreOne = this.state.playerOneScore;
-        // const scoreTwo = this.state.playerTwoScore;
-
-        // if (full) {
-        //     console.log('Player One Score: ' + scoreOne);
-        //     console.log('Player Two Score: ' + scoreTwo);
-        //     if (scoreOne > scoreTwo) {
-        //         console.log('Player One wins')
-        //     }
-        //     if (scoreOne < scoreTwo) {
-        //         console.log('Player Two wins')
-        //     }
-        // }
     }
 
     checkSOS(row, column) {
@@ -102,11 +86,11 @@ class Board extends Component {
         let scoreIncremented = false;
 
         for (let i = 0; i < lines.length; i++) {
-            const [ar, ac, br, bc, cr, cc] = lines[i];
+            const [rowA, columnA, rowB, columnB, rowC, columnC] = lines[i];
 
-            if ((ar >= 0 && ar <= 4) && (br >= 0 && br <= 4) && (cr >= 0 && cr <= 4)) {
+            if ((rowA >= 0 && rowA <= 4) && (rowB >= 0 && rowB <= 4) && (rowC >= 0 && rowC <= 4)) {
 
-                const pattern = this.state.squares[ar][ac] + this.state.squares[br][bc] + this.state.squares[cr][cc];
+                const pattern = this.state.squares[rowA][columnA] + this.state.squares[rowB][columnB] + this.state.squares[rowC][columnC];
                 if (pattern === 'SOS') {
                     currentScore += 1;
                     scoreIncremented = true;
@@ -133,37 +117,21 @@ class Board extends Component {
 
     checkIfFull() {
         const grid = this.state.squares;
-        let x = [];
+        let nullIndex = [];
 
         for (let i = 0; i < grid.length; i++) {
-            let index = grid[i].indexOf(null);
-            x.push(index);
+            let rowIndexOFNull = grid[i].indexOf(null);
+            nullIndex.push(rowIndexOFNull);
         }
 
-        const y = x.find(z => {
-            return z > -1
+        const findIndexOfNull = nullIndex.find(index => {
+            return index > -1
         })
 
-        if (typeof y === 'undefined') {
+        if (typeof findIndexOfNull === 'undefined') {
             this.setState({
                 isBoardFull: true
             })
-        }
-    }
-
-    declareWinner() {
-        const full = this.state.isBoardFull;
-        const scoreOne = this.state.playerOneScore;
-        const scoreTwo = this.state.playerTwoScore;
-        if (full) {
-            console.log('Player One Score: ' + scoreOne);
-            console.log('Player Two Score: ' + scoreTwo);
-            if (scoreOne > scoreTwo) {
-                console.log('Player One wins')
-            }
-            if (scoreOne < scoreTwo) {
-                console.log('Player Two wins')
-            }
         }
     }
 
@@ -184,7 +152,22 @@ class Board extends Component {
             )
         })
 
-        this.declareWinner();
+        const full = this.state.isBoardFull;
+        const scoreOne = this.state.playerOneScore;
+        const scoreTwo = this.state.playerTwoScore;
+        let declareWinner = '';
+
+        if (full) {
+            if (scoreOne > scoreTwo) {
+                declareWinner = 'Player One wins'
+            }
+            if (scoreOne < scoreTwo) {
+                declareWinner = 'Player Two wins'
+            }
+            if (scoreOne === scoreTwo) {
+                declareWinner = 'It\'s a draw'
+            }
+        }
 
         return (
             <div>
@@ -192,6 +175,7 @@ class Board extends Component {
                 <div className="score">{playerOneScore}</div>
                 <div className="score">{playerTwoScore}</div>
                 {board}
+                <div className="winner">{declareWinner}</div>
             </div>
         );
     }
