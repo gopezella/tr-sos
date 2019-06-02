@@ -22,7 +22,7 @@ class Board extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            squares: Array(5).fill(null).map(x => Array(5).fill(null)),
+            squares: Array(18).fill(null).map(x => Array(18).fill(null)),
             isLetterS: true,
             isPlayerOne: true,
             playerOneScore: 0,
@@ -88,7 +88,7 @@ class Board extends Component {
         for (let i = 0; i < lines.length; i++) {
             const [rowA, columnA, rowB, columnB, rowC, columnC] = lines[i];
 
-            if ((rowA >= 0 && rowA <= 4) && (rowB >= 0 && rowB <= 4) && (rowC >= 0 && rowC <= 4)) {
+            if ((rowA >= 0 && rowA <= 17) && (rowB >= 0 && rowB <= 17) && (rowC >= 0 && rowC <= 17)) {
 
                 const pattern = this.state.squares[rowA][columnA] + this.state.squares[rowB][columnB] + this.state.squares[rowC][columnC];
                 if (pattern === 'SOS') {
