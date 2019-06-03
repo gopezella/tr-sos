@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
+import uuid from 'uuid';
 import './index.css';
 
 function Square(props) {
     return (
-        <button className="square" onClick={props.onClick}>
+        <button className="square" onClick={props.onClick} style={{backgroundColor: props.winner ? 'red' : ''}}>
             {props.value}
         </button>
     );
@@ -22,13 +23,32 @@ class Board extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            squares: Array(18).fill(null).map(x => Array(18).fill(null)),
+            squares: Array(props.iterationNum).fill(null).map(x => Array(props.iterationNum).fill(null)),
+            squaresDatas: [],
             isLetterS: true,
             isPlayerOne: true,
             playerOneScore: 0,
             playerTwoScore: 0,
-            isBoardFull: false
+            isBoardFull: false,
+            declareWinner: ''
         };
+    }
+
+    componentWillMount() {
+        const squaresDatas = this.state.squares.map((row, i) => {
+            return row.map((column, j) => {
+                const initData = {
+                    value: '',
+                    winner: false
+                }
+
+                return initData;
+            })
+        });
+
+        this.setState({
+            squaresDatas
+        });
     }
 
     renderToggleLetter() {
@@ -43,26 +63,15 @@ class Board extends Component {
         });
     }
 
-    renderSquare(i, j) {
-        return (
-            <Square
-                value={this.state.squares[i][j]}
-                onClick={() => this.handleSquareClick(i, j)}
-            />
-        );
-    }
-
     handleSquareClick(i, j) {
-        const squares = this.state.squares.slice();
-        if (squares[i][j] == null) {
-            squares[i][j] = this.state.isLetterS ? 'S' : 'O';
-            this.setState({
-                squares: squares,
-            });
+        const squaresDatas = this.state.squaresDatas.slice();
+        squaresDatas[i][j].value = this.state.isLetterS ? 'S' : 'O';
+        this.setState({
+            squaresDatas,
+        });
 
-            this.checkSOS(i, j);
-            this.checkIfFull();
-        }
+        this.checkSOS(i, j);
+        this.checkIfFull();
     }
 
     checkSOS(row, column) {
@@ -84,16 +93,38 @@ class Board extends Component {
 
         let currentScore = this.state.isPlayerOne ? this.state.playerOneScore : this.state.playerTwoScore;
         let scoreIncremented = false;
-
+        const iterationNumLastIndex = this.props.iterationNum - 1;
         for (let i = 0; i < lines.length; i++) {
             const [rowA, columnA, rowB, columnB, rowC, columnC] = lines[i];
 
-            if ((rowA >= 0 && rowA <= 17) && (rowB >= 0 && rowB <= 17) && (rowC >= 0 && rowC <= 17)) {
-
-                const pattern = this.state.squares[rowA][columnA] + this.state.squares[rowB][columnB] + this.state.squares[rowC][columnC];
+            if ((rowA >= 0 && rowA <= iterationNumLastIndex && columnA >= 0 && columnA <= iterationNumLastIndex) 
+                    && (rowB >= 0 && rowB <= iterationNumLastIndex && columnB >= 0 && columnB <= iterationNumLastIndex) 
+                    && (rowC >= 0 && rowC <= iterationNumLastIndex && columnC >= 0 && columnC <= iterationNumLastIndex)) {
+                // console.log(`${rowA}, ${columnA}`);
+                // console.log(`${rowB}, ${columnB}`);
+                // console.log(`${rowC}, ${columnC}`);
+                const pattern = (this.state.squaresDatas[rowA][columnA].value || '') 
+                            + (this.state.squaresDatas[rowB][columnB].value || '') 
+                            + (this.state.squaresDatas[rowC][columnC].value || '');
                 if (pattern === 'SOS') {
                     currentScore += 1;
                     scoreIncremented = true;
+                    const squaresDatas = this.state.squaresDatas.map((row, i) => {
+                        return row.map((column, j) => {
+                            const currentSquare = this.state.squaresDatas[i][j];
+                            if ((rowA === i && columnA === j)
+                                    || (rowB === i && columnB === j)
+                                    || (rowC === i && columnC === j)) {
+                                currentSquare.winner = true;
+                            }
+
+                            return currentSquare;
+                        })
+                    })
+
+                    this.setState({
+                        squaresDatas
+                    })
                 }
             }
         }
@@ -116,48 +147,24 @@ class Board extends Component {
     }
 
     checkIfFull() {
-        const grid = this.state.squares;
-        let nullIndex = [];
+        const grid = this.state.squaresDatas;
 
-        for (let i = 0; i < grid.length; i++) {
-            let rowIndexOFNull = grid[i].indexOf(null);
-            nullIndex.push(rowIndexOFNull);
-        }
-
-        const findIndexOfNull = nullIndex.find(index => {
-            return index > -1
+        const foundNotFilled = grid.find((row, i) => {
+            return row.find((column, j) => {
+                return grid[i][j].value === ''
+            })
         })
 
-        if (typeof findIndexOfNull === 'undefined') {
+        console.log(foundNotFilled);
+
+        if (typeof foundNotFilled === 'undefined') {
             this.setState({
                 isBoardFull: true
             })
-        }
-    }
+            const scoreOne = this.state.playerOneScore;
+            const scoreTwo = this.state.playerTwoScore;
+            let declareWinner = '';
 
-    render() {
-        const status = 'Player ' + (this.state.isPlayerOne ? '1\'s' : '2\'s') + ' turn: ' + (this.state.isLetterS ? 'S' : 'O');
-        const playerOneScore = 'Player 1: ' + (this.state.playerOneScore);
-        const playerTwoScore = 'Player 2: ' + (this.state.playerTwoScore);
-
-        const grid = this.state.squares;
-
-        const board = grid.map((row, i) => {
-            return (
-                <div className="board-row">
-                    {row.map((column, j) => {
-                        return this.renderSquare(i, j)
-                    })}
-                </div>
-            )
-        })
-
-        const full = this.state.isBoardFull;
-        const scoreOne = this.state.playerOneScore;
-        const scoreTwo = this.state.playerTwoScore;
-        let declareWinner = '';
-
-        if (full) {
             if (scoreOne > scoreTwo) {
                 declareWinner = 'Player One wins'
             }
@@ -167,7 +174,32 @@ class Board extends Component {
             if (scoreOne === scoreTwo) {
                 declareWinner = 'It\'s a draw'
             }
+            this.setState({
+                declareWinner
+            });
         }
+    }
+
+    render() {
+        const status = 'Player ' + (this.state.isPlayerOne ? '1\'s' : '2\'s') + ' turn: ' + (this.state.isLetterS ? 'S' : 'O');
+        const playerOneScore = 'Player 1: ' + (this.state.playerOneScore);
+        const playerTwoScore = 'Player 2: ' + (this.state.playerTwoScore);
+
+        const grid = this.state.squaresDatas;
+        const board = grid.map((row, i) => {
+            return (
+                <div key={uuid.v4()} className="board-row">
+                    {row.map((column, j) => {
+                        return <Square
+                            key={uuid.v4()}
+                            value={this.state.squaresDatas[i][j].value}
+                            onClick={() => this.handleSquareClick(i, j)}
+                            winner={this.state.squaresDatas[i][j].winner}
+                        />
+                    })}
+                </div>
+            )
+        })
 
         return (
             <div>
@@ -175,18 +207,25 @@ class Board extends Component {
                 <div className="score">{playerOneScore}</div>
                 <div className="score">{playerTwoScore}</div>
                 {board}
-                <div className="winner">{declareWinner}</div>
+                <div className="winner">{this.state.declareWinner}</div>
             </div>
         );
     }
 }
 
 class Game extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            iterationNum: 4
+        }
+    }
+
     render() {
         return (
             <div className="game">
                 <div className="game-board">
-                    <Board />
+                    <Board iterationNum={this.state.iterationNum}/>
                 </div>
                 <div className="game-info">
                     <div>{/* status */}</div>
